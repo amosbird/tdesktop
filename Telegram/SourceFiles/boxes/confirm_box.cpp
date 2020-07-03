@@ -556,7 +556,7 @@ void DeleteMessagesBox::prepare() {
 				: st::attentionBoxButton);
 		}
 		if (auto revoke = revokeText(peer)) {
-			_revoke.create(this, revoke->checkbox, false, st::defaultBoxCheckbox);
+			_revoke.create(this, revoke->checkbox, true, st::defaultBoxCheckbox);
 			appendDetails(std::move(revoke->description));
 		}
 	} else if (_moderateFrom) {
@@ -578,7 +578,7 @@ void DeleteMessagesBox::prepare() {
 			auto count = int(_ids.size());
 			if (hasScheduledMessages()) {
 			} else if (auto revoke = revokeText(peer)) {
-				_revoke.create(this, revoke->checkbox, false, st::defaultBoxCheckbox);
+				_revoke.create(this, revoke->checkbox, true, st::defaultBoxCheckbox);
 				appendDetails(std::move(revoke->description));
 			} else if (peer->isChannel()) {
 				if (peer->isMegagroup()) {

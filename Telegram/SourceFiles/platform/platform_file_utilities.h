@@ -21,6 +21,7 @@ bool UnsafeShowOpenWithDropdown(const QString &filepath, QPoint menuPosition);
 bool UnsafeShowOpenWith(const QString &filepath);
 void UnsafeLaunch(const QString &filepath);
 void UnsafeShowInFolder(const QString &filepath);
+void UnsafeOpenLink(const QString &url);
 
 void PostprocessDownloaded(const QString &filepath);
 

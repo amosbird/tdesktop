@@ -94,6 +94,7 @@ const auto CommandByName = base::flat_map<QString, Command>{
 	{ qsl("message_silently")  , Command::SendSilentMessage },
 	{ qsl("message_scheduled") , Command::ScheduleMessage },
 	//
+	{ qsl("show_chats_list")  , Command::ShowChatsList },
 };
 
 const auto CommandNames = base::flat_map<Command, QString>{
@@ -130,6 +131,7 @@ const auto CommandNames = base::flat_map<Command, QString>{
 	{ Command::ShowFolderLast , qsl("last_folder") },
 
 	{ Command::ShowArchive    , qsl("show_archive") },
+	{ Command::ShowChatsList  , qsl("show_chats_list") },
 };
 
 class Manager {
@@ -377,6 +379,7 @@ void Manager::fillDefaults() {
 	set(qsl("%1+shift+up").arg(ctrl), Command::FolderPrevious);
 
 	set(qsl("ctrl+0"), Command::ChatSelf);
+	set(qsl("alt+g"), Command::ShowChatsList);
 
 	set(qsl("ctrl+9"), Command::ShowArchive);
 }

@@ -290,7 +290,12 @@ QString DocumentFileNameForSave(
 		caption = tr::lng_save_video(tr::now);
 		prefix = qsl("video");
 	} else {
-		name = already.isEmpty() ? data->filename() : already;
+		if (!already.isEmpty())
+			name = already;
+		else if (auto song = const_cast<DocumentData*>(data.get())->song())
+			name = song->title + pattern.replace('*', QString());
+		else
+			name = data->filename();
 		if (name.isEmpty()) {
 			name = pattern.isEmpty() ? qsl(".unknown") : pattern.replace('*', QString());
 		}

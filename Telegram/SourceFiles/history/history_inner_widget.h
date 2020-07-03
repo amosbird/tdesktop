@@ -146,6 +146,8 @@ public slots:
 	void onTouchSelect();
 	void onTouchScrollTimer();
 
+	void onSingleClick();
+
 private:
 	class BotAbout;
 	using SelectedItems = std::map<HistoryItem*, TextSelection, std::less<>>;
@@ -353,6 +355,7 @@ private:
 	QPoint _dragStartPosition;
 	QPoint _mousePosition;
 	HistoryItem *_mouseActionItem = nullptr;
+	HistoryItem *_singleClickActionItem = nullptr;
 	HistoryItem *_dragStateItem = nullptr;
 	CursorState _mouseCursorState = CursorState();
 	uint16 _mouseTextSymbol = 0;
@@ -360,6 +363,7 @@ private:
 
 	QPoint _trippleClickPoint;
 	QTimer _trippleClickTimer;
+	QTimer _singleClickTimer;
 
 	Element *_dragSelFrom = nullptr;
 	Element *_dragSelTo = nullptr;

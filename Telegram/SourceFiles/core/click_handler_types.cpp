@@ -41,35 +41,8 @@ void HiddenUrlClickHandler::Open(QString url, QVariant context) {
 
 	const auto open = [=] {
 		UrlClickHandler::Open(url, context);
-	};
-	if (url.startsWith(qstr("tg://"), Qt::CaseInsensitive)
-		|| url.startsWith(qstr("internal:"), Qt::CaseInsensitive)) {
-		open();
-	} else {
-		const auto parsedUrl = QUrl::fromUserInput(url);
-		if (UrlRequiresConfirmation(url)
-			&& QGuiApplication::keyboardModifiers() != Qt::ControlModifier) {
-			Core::App().hideMediaView();
-			const auto displayed = parsedUrl.isValid()
-				? parsedUrl.toDisplayString()
-				: url;
-			const auto displayUrl = !IsSuspicious(displayed)
-				? displayed
-				: parsedUrl.isValid()
-				? QString::fromUtf8(parsedUrl.toEncoded())
-				: ShowEncoded(displayed);
-			Ui::show(
-				Box<ConfirmBox>(
-					(tr::lng_open_this_link(tr::now)
-						+ qsl("\n\n")
-						+ displayUrl),
-					tr::lng_open_link(tr::now),
-					[=] { Ui::hideLayer(); open(); }),
-				Ui::LayerOption::KeepOther);
-		} else {
-			open();
-		}
-	}
+    };
+    open();
 }
 
 void BotGameUrlClickHandler::onClick(ClickContext context) const {

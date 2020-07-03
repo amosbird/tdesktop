@@ -159,6 +159,9 @@ HistoryInner::HistoryInner(
 
 	_trippleClickTimer.setSingleShot(true);
 
+	_singleClickTimer.setSingleShot(true);
+	connect(&_singleClickTimer, SIGNAL(timeout()), this, SLOT(onSingleClick()));
+
 	notifyIsBotChanged();
 
 	setMouseTracking(true);
@@ -849,6 +852,12 @@ void HistoryInner::onTouchScrollTimer() {
 	}
 }
 
+void HistoryInner::onSingleClick() {
+	_selected.emplace(_singleClickActionItem, FullSelection);
+	repaintItem(_singleClickActionItem);
+	_widget->updateTopBarSelection();
+}
+
 void HistoryInner::touchUpdateSpeed() {
 	const auto nowTime = crl::now();
 	if (_touchPrevPosValid) {
@@ -1051,7 +1060,7 @@ void HistoryInner::mousePressEvent(QMouseEvent *e) {
 
 void HistoryInner::mouseActionStart(const QPoint &screenPos, Qt::MouseButton button) {
 	mouseActionUpdate(screenPos);
-	if (button != Qt::LeftButton) return;
+	if (button == Qt::RightButton) return;
 
 	ClickHandler::pressed();
 	if (App::pressedItem() != App::hoveredItem()) {
@@ -1363,14 +1372,19 @@ void HistoryInner::mouseActionFinish(
 		});
 		return;
 	}
-	if ((_mouseAction == MouseAction::PrepareSelect)
-		&& !_pressWasInactive
-		&& !_selected.empty()
-		&& (_selected.cbegin()->second == FullSelection)) {
+	if (_selected.empty() && button == Qt::MiddleButton) {
+		_selected.emplace(_mouseActionItem, FullSelection);
+		repaintItem(_mouseActionItem);
+		_widget->updateTopBarSelection();
+	} else if ((_mouseAction == MouseAction::PrepareSelect
+				|| button == Qt::MiddleButton)
+			&& !_pressWasInactive
+			&& !_selected.empty()
+			&& (_selected.cbegin()->second == FullSelection)) {
 		changeSelectionAsGroup(
-			&_selected,
-			_mouseActionItem,
-			SelectAction::Invert);
+				&_selected,
+				_mouseActionItem,
+				SelectAction::Invert);
 		repaintItem(_mouseActionItem);
 	} else if ((_mouseAction == MouseAction::PrepareDrag)
 		&& !_pressWasInactive
@@ -1431,6 +1445,7 @@ void HistoryInner::mouseReleaseEvent(QMouseEvent *e) {
 }
 
 void HistoryInner::mouseDoubleClickEvent(QMouseEvent *e) {
+	_singleClickTimer.stop();
 	mouseActionStart(e->globalPos(), e->button());
 
 	const auto mouseActionView = _mouseActionItem
@@ -2019,7 +2034,7 @@ void HistoryInner::keyPressEvent(QKeyEvent *e) {
 		&& e->modifiers().testFlag(Qt::ControlModifier)) {
 		TextUtilities::SetClipboardText(getSelectedText(), QClipboard::FindBuffer);
 #endif // Q_OS_MAC
-	} else if (e == QKeySequence::Delete) {
+	} else if (e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) {
 		auto selectedState = getSelectionState();
 		if (selectedState.count > 0
 			&& selectedState.canDeleteCount == selectedState.count) {

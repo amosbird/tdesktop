@@ -188,9 +188,7 @@ void SetupInterfaceScale(
 		icon ? st::settingsScalePadding : st::settingsBigScalePadding);
 
 	static const auto ScaleValues = [&] {
-		auto values = (cIntRetinaFactor() > 1)
-			? std::vector<int>{ 100, 110, 120, 130, 140, 150 }
-			: std::vector<int>{ 100, 125, 150, 200, 250, 300 };
+		auto values = std::vector<int>{ 100, 110, 120, 130, 140, 150 };
 		if (cConfigScale() == style::kScaleAuto) {
 			return values;
 		}

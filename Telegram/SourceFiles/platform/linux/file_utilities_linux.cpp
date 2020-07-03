@@ -98,7 +98,25 @@ void UnsafeLaunch(const QString &filepath) {
 void UnsafeShowInFolder(const QString &filepath) {
 	// Hide mediaview to make other apps visible.
 	Ui::hideLayer(anim::type::instant);
-	base::Platform::ShowInFolder(filepath);
+
+	auto absolutePath = QFileInfo(filepath).absoluteFilePath();
+	auto command = qsl("showinfolder");
+	auto arguments = QStringList();
+		arguments << absolutePath;
+	QProcess process;
+	if (!process.startDetached(command, arguments)) {
+		LOG(("Failed to launch '%1 %2'").arg(command).arg(arguments.join(' ')));
+	}
+}
+
+void UnsafeOpenLink(const QString &url) {
+	auto command = qsl("luakitbg");
+	auto arguments = QStringList();
+	arguments << url;
+	QProcess process;
+	if (!process.startDetached(command, arguments)) {
+		LOG(("Failed to launch '%1 %2'").arg(command).arg(arguments.join(' ')));
+	}
 }
 
 } // namespace File
