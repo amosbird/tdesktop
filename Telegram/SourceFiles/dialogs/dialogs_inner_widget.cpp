@@ -3088,6 +3088,10 @@ void InnerWidget::setupShortcuts() {
 			}
 			return false;
 		});
+		request->check(Command::ShowChatsList) && request->handle([] {
+			App::main()->searchMessages("", Dialogs::Key());
+			return true;
+		});
 
 		const auto filters = &session().data().chatsFilters().list();
 		if (const auto filtersCount = int(filters->size())) {

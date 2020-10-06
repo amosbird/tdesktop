@@ -119,6 +119,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QGuiApplication> // keyboardModifiers()
 #include <QtGui/QWindow>
 #include <QtCore/QMimeData>
+#include <QtWidgets/QApplication>
 
 namespace {
 
@@ -272,6 +273,7 @@ HistoryWidget::HistoryWidget(
 
 	_historyDown->installEventFilter(this);
 	_unreadMentions->installEventFilter(this);
+	_scroll->installEventFilter(this);
 
 	InitMessageField(controller, _field);
 	_fieldAutocomplete->hide();
@@ -2997,6 +2999,11 @@ void HistoryWidget::send(Api::SendOptions options) {
 		return;
 	}
 
+	historyDownClicked();
+
+	if (_field->empty())
+		return;
+
 	const auto webPageId = _previewCancelled
 		? CancelledWebPageId
 		: ((_previewData && _previewData->pendingTill >= 0)
@@ -3572,6 +3579,34 @@ bool HistoryWidget::eventFilter(QObject *obj, QEvent *e) {
 	}
 	if ((obj == _historyDown || obj == _unreadMentions) && e->type() == QEvent::Wheel) {
 		return _scroll->viewportEvent(e);
+	}
+	if (obj == _scroll && e->type() == QEvent::KeyPress)
+	{
+		const auto k = static_cast<QKeyEvent*>(e);
+		if (k->key() == Qt::Key_Down) {
+			if (auto method = Shortcuts::RequestHandler(Shortcuts::Command::ChatNext)) {
+				crl::on_main(this, std::move(method));
+			}
+			return true;
+		} else if (k->key() == Qt::Key_Up) {
+			if (auto method = Shortcuts::RequestHandler(Shortcuts::Command::ChatPrevious)) {
+				crl::on_main(this, std::move(method));
+			}
+			return true;
+		} else if (k->key() == Qt::Key_Return || k->key() == Qt::Key_Enter) {
+			if (!_botStart->isHidden()) {
+				sendBotStartCommand();
+			}
+			if (!_canSendMessages) {
+				const auto submitting = Ui::InputField::ShouldSubmit(
+						Core::App().settings().sendSubmitWay(),
+						k->modifiers());
+				if (submitting) {
+					sendWithModifiers(k->modifiers());
+				}
+			}
+			return true;
+		}
 	}
 	return TWidget::eventFilter(obj, e);
 }
@@ -4994,12 +5029,18 @@ void HistoryWidget::keyPressEvent(QKeyEvent *e) {
 		controller()->showBackFromStack();
 		emit cancelled();
 	} else if (e->key() == Qt::Key_PageDown) {
-		_scroll->keyPressEvent(e);
+		if (_field->empty())
+			_scroll->scrollToY(_scroll->scrollTop() + _scroll->height() / 2);
 	} else if (e->key() == Qt::Key_PageUp) {
-		_scroll->keyPressEvent(e);
-	} else if (e->key() == Qt::Key_Down && !commonModifiers) {
-		_scroll->keyPressEvent(e);
-	} else if (e->key() == Qt::Key_Up && !commonModifiers) {
+		if (_field->empty())
+			_scroll->scrollToY(_scroll->scrollTop() - _scroll->height() / 2);
+	} else if (e->key() == Qt::Key_Down || e->key() == Qt::Key_Up) {
+		e->ignore();
+	} else if (e->key() == Qt::Key_R && (e->modifiers() & (Qt::ShiftModifier | Qt::MetaModifier | Qt::ControlModifier)) == Qt::ControlModifier) {
+		replyToPreviousMessage();
+	} else if (e->key() == Qt::Key_R && (e->modifiers() & (Qt::ShiftModifier | Qt::MetaModifier | Qt::ControlModifier)) == (Qt::ShiftModifier | Qt::ControlModifier)) {
+		replyToNextMessage();
+	} else if (e->key() == Qt::Key_P && (e->modifiers() & (Qt::ShiftModifier | Qt::MetaModifier | Qt::ControlModifier)) == Qt::ControlModifier) {
 		const auto item = _history
 			? _history->lastSentMessage()
 			: nullptr;

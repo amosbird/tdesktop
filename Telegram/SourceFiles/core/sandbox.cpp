@@ -186,7 +186,7 @@ void Sandbox::setupScreenScale() {
 	const auto dpi = Sandbox::primaryScreen()->logicalDotsPerInch();
 	LOG(("Primary screen DPI: %1").arg(dpi));
 	if (dpi <= 108) {
-		cSetScreenScale(100); // 100%:  96 DPI (0-108)
+		cSetScreenScale(110); // 100%:  96 DPI (0-108)
 	} else if (dpi <= 132) {
 		cSetScreenScale(125); // 125%: 120 DPI (108-132)
 	} else if (dpi <= 168) {

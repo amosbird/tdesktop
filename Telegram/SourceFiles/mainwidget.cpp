@@ -2477,6 +2477,15 @@ void MainWidget::returnTabbedSelector() {
 }
 
 void MainWidget::keyPressEvent(QKeyEvent *e) {
+	if (e->key() == Qt::Key_Down) {
+		if (auto method = Shortcuts::RequestHandler(Shortcuts::Command::ChatNext)) {
+			crl::on_main(this, std::move(method));
+		}
+	} else if (e->key() == Qt::Key_Up) {
+		if (auto method = Shortcuts::RequestHandler(Shortcuts::Command::ChatPrevious)) {
+			crl::on_main(this, std::move(method));
+		}
+	}
 }
 
 bool MainWidget::eventFilter(QObject *o, QEvent *e) {

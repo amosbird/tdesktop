@@ -245,15 +245,6 @@ void MainWindow::init() {
 
 	updatePalette();
 
-	if (Platform::AllowNativeWindowFrameToggle()) {
-		Core::App().settings().nativeWindowFrameChanges(
-		) | rpl::start_with_next([=](bool native) {
-			refreshTitleWidget();
-			recountGeometryConstraints();
-		}, lifetime());
-	}
-	refreshTitleWidget();
-
 	initSize();
 	updateUnreadCounter();
 }

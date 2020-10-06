@@ -52,6 +52,7 @@ enum class Command {
 	JustSendMessage,
 	SendSilentMessage,
 	ScheduleMessage,
+	ShowChatsList,
 
 	ReadChat,
 
